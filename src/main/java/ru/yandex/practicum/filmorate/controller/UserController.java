@@ -1,13 +1,15 @@
 package ru.yandex.practicum.filmorate.controller;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserIdGenerator;
 
+import javax.validation.Valid;
 import java.util.Map;
 import java.util.HashMap;
-import java.time.Instant;
 
+@Slf4j
 @RestController
 @RequestMapping("/user")
 public class UserController {
@@ -15,26 +17,27 @@ public class UserController {
 
     @GetMapping
     public Map<Integer, User> getAllUsers() {
+        log.info("GET /user: request successfully processed");
         return users;
     }
 
     @PostMapping
-    public User createUser(@RequestBody User user) throws ValidationException {
+    public User createUser(@Valid @RequestBody User user) throws ValidationException {
         if (user.getId() != 0) {
-            throw new ValidationException("To create a user, you should not pass an id\n" +
-                                          "The id is assigned automatically");
-        } else if (user.getEmail() == null || user.getLogin() == null ||
-                   user.getName() == null || user.getBirthday() == null ||
-                   user.getEmail().isBlank() || !user.getEmail().contains("@") ||
-                   user.getLogin().isBlank() || user.getBirthday().isAfter(Instant.now())) {
-            throw new ValidationException("Incorrect request body data");
+            String message = "An id was passed (user id is assigned automatically)";
+            log.warn("POST /user: ValidationException: " + message);
+            throw new ValidationException(message);
         } else {
-            for (Map.Entry<Integer, User> oldUser : users.entrySet())  {
+            for (Map.Entry<Integer, User> oldUser : users.entrySet()) {
                 if (oldUser.getValue().getEmail().equals(user.getEmail())) {
-                    throw new ValidationException("A user with such an email already exists");
+                    String message = "A user with such an email already exists";
+                    log.warn("POST /user: ValidationException: " + message);
+                    throw new ValidationException(message);
                 }
                 if (oldUser.getValue().getLogin().equals(user.getLogin())) {
-                    throw new ValidationException("A user with such login already exists");
+                    String message = "A user with such login already exists";
+                    log.warn("POST /user: ValidationException: " + message);
+                    throw new ValidationException(message);
                 }
             }
             user.setId(UserIdGenerator.getUserId());
@@ -42,25 +45,26 @@ public class UserController {
                 user.setName(user.getLogin());
             }
             users.put(user.getId(), user);
+            log.info("POST /user: user successfully created");
             return user;
         }
     }
 
     @PutMapping
-    public User updateUser(@RequestBody User newUser) throws ValidationException {
+    public User updateUser(@Valid @RequestBody User newUser) throws ValidationException {
         if (newUser.getId() == 0) {
-            throw new ValidationException("An empty user id was passed");
+            String message = "An empty user id was passed";
+            log.warn("PUT /user: ValidationException: " + message);
+            throw new ValidationException(message);
         } else if (!users.containsKey(newUser.getId())) {
-            throw new ValidationException("There is no user with such id");
-        } else if (newUser.getEmail() == null || newUser.getLogin() == null ||
-                   newUser.getName() == null || newUser.getBirthday() == null ||
-                   newUser.getEmail().isBlank() || !newUser.getEmail().contains("@") ||
-                   newUser.getLogin().isBlank() || newUser.getBirthday().isAfter(Instant.now())) {
-            throw new ValidationException("Incorrect request body data");
+            String message = "There is no user with such id";
+            log.warn("PUT /user: ValidationException: " + message);
+            throw new ValidationException(message);
         } else {
             User user = users.get(newUser.getId());
             user.setName(newUser.getName());
             user.setBirthday(newUser.getBirthday());
+            log.info("PUT /user: user successfully updated");
             return user;
         }
     }
