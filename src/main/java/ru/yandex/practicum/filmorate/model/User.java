@@ -18,7 +18,8 @@ public class User {
     private String email;
     @NotNull
     @NotBlank
-    @Pattern(regexp = "^[A-Za-z]+$", message = "не должно содержать пробелы")
+    @Pattern(regexp = "^[A-Za-z]+$",
+             message = "должно содержать только латинские буквы без пробелов")
     private String login;
     @NotNull
     private String name;

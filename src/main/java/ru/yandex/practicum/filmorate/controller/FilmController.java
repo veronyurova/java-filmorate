@@ -25,7 +25,7 @@ public class FilmController {
     public Film createFilm(@Valid @RequestBody Film film) throws ValidationException {
         if (film.getId() != 0) {
             String message = "An id was passed (film id is assigned automatically)";
-            log.warn("POST /film: ValidationException: " + message);
+            log.warn("POST /film: ValidationException: {}", message);
             throw new ValidationException(message);
         } else {
             film.setId(FilmIdGenerator.getFilmId());
@@ -39,11 +39,11 @@ public class FilmController {
     public Film updateFilm(@Valid @RequestBody Film newFilm) throws ValidationException {
         if (newFilm.getId() == 0) {
             String message = "An empty film id was passed";
-            log.warn("PUT /film: ValidationException: " + message);
+            log.warn("PUT /film: ValidationException: {}", message);
             throw new ValidationException(message);
         } else if (!films.containsKey(newFilm.getId())) {
             String message = "There is no film with such id";
-            log.warn("PUT /film: ValidationException: " + message);
+            log.warn("PUT /film: ValidationException: {}", message);
             throw new ValidationException(message);
         } else {
             Film film = films.get(newFilm.getId());

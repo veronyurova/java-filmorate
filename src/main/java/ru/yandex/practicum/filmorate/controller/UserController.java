@@ -25,18 +25,18 @@ public class UserController {
     public User createUser(@Valid @RequestBody User user) throws ValidationException {
         if (user.getId() != 0) {
             String message = "An id was passed (user id is assigned automatically)";
-            log.warn("POST /user: ValidationException: " + message);
+            log.warn("POST /user: ValidationException: {}", message);
             throw new ValidationException(message);
         } else {
             for (Map.Entry<Integer, User> oldUser : users.entrySet()) {
                 if (oldUser.getValue().getEmail().equals(user.getEmail())) {
                     String message = "A user with such an email already exists";
-                    log.warn("POST /user: ValidationException: " + message);
+                    log.warn("POST /user: ValidationException: {}", message);
                     throw new ValidationException(message);
                 }
                 if (oldUser.getValue().getLogin().equals(user.getLogin())) {
                     String message = "A user with such login already exists";
-                    log.warn("POST /user: ValidationException: " + message);
+                    log.warn("POST /user: ValidationException: {}", message);
                     throw new ValidationException(message);
                 }
             }
@@ -54,11 +54,11 @@ public class UserController {
     public User updateUser(@Valid @RequestBody User newUser) throws ValidationException {
         if (newUser.getId() == 0) {
             String message = "An empty user id was passed";
-            log.warn("PUT /user: ValidationException: " + message);
+            log.warn("PUT /user: ValidationException: {}", message);
             throw new ValidationException(message);
         } else if (!users.containsKey(newUser.getId())) {
             String message = "There is no user with such id";
-            log.warn("PUT /user: ValidationException: " + message);
+            log.warn("PUT /user: ValidationException: {}", message);
             throw new ValidationException(message);
         } else {
             User user = users.get(newUser.getId());

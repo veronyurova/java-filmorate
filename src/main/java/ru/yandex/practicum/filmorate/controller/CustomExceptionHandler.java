@@ -20,9 +20,10 @@ public class CustomExceptionHandler {
         List<String> fieldErrors = new ArrayList<>();
         for (FieldError fieldError : e.getBindingResult().getFieldErrors()) {
             fieldErrors.add(fieldError.getField() + ": " + fieldError.getDefaultMessage());
-            log.warn("MethodArgumentNotValidException: Validation failed for value [" +
-                     fieldError.getRejectedValue() + "] in field " + fieldError.getObjectName() +
-                     "." + fieldError.getField() + "; message: " + fieldError.getDefaultMessage());
+            log.warn("MethodArgumentNotValidException: Validation failed " +
+                     "for value [{}] in field {}.{}; message: {}",
+                     fieldError.getRejectedValue(), fieldError.getObjectName(),
+                     fieldError.getField(), fieldError.getDefaultMessage());
         }
         return fieldErrors;
     }
