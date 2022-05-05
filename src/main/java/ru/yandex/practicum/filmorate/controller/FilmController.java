@@ -1,58 +1,47 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.Film;
-import ru.yandex.practicum.filmorate.model.FilmIdGenerator;
+import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.service.FilmService;
 
 import javax.validation.Valid;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/films")
 public class FilmController {
-    private final Map<Integer, Film> films = new HashMap<>();
+    private final FilmService filmService;
+
+    @Autowired
+    public FilmController(FilmService filmService) {
+        this.filmService = filmService;
+    }
 
     @GetMapping
-    public Map<Integer, Film> getAllFilms() {
-        log.info("GET /film: request successfully processed");
-        return films;
+    public List<Film> getFilmsList() {
+        log.info("GET /films: request successfully processed");
+        return filmService.getFilmsList();
+    }
+
+    @GetMapping("/{id}")
+    public Film getFilmById(@PathVariable int id) {
+        log.info("GET /films/{id}: request successfully processed");
+        return filmService.getFilmById(id);
     }
 
     @PostMapping
-    public Film createFilm(@Valid @RequestBody Film film) throws ValidationException {
-        if (film.getId() != 0) {
-            String message = "An id was passed (film id is assigned automatically)";
-            log.warn("POST /film: ValidationException: {}", message);
-            throw new ValidationException(message);
-        } else {
-            film.setId(FilmIdGenerator.getFilmId());
-            films.put(film.getId(), film);
-            log.info("POST /film: film successfully created");
-            return film;
-        }
+    public Film createFilm(@Valid @RequestBody Film film) {
+        log.info("POST /films: film successfully created");
+        return filmService.createFilm(film);
     }
 
     @PutMapping
-    public Film updateFilm(@Valid @RequestBody Film newFilm) throws ValidationException {
-        if (newFilm.getId() == 0) {
-            String message = "An empty film id was passed";
-            log.warn("PUT /film: ValidationException: {}", message);
-            throw new ValidationException(message);
-        } else if (!films.containsKey(newFilm.getId())) {
-            String message = "There is no film with such id";
-            log.warn("PUT /film: ValidationException: {}", message);
-            throw new ValidationException(message);
-        } else {
-            Film film = films.get(newFilm.getId());
-            film.setName(newFilm.getName());
-            film.setDescription(newFilm.getDescription());
-            film.setReleaseDate(newFilm.getReleaseDate());
-            film.setDuration(newFilm.getDuration());
-            log.info("PUT /film: film successfully updated");
-            return film;
-        }
+    public Film updateFilm(@Valid @RequestBody Film newFilm) {
+        log.info("PUT /films: film successfully updated");
+        return filmService.updateFilm(newFilm);
     }
 }

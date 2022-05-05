@@ -1,71 +1,66 @@
 package ru.yandex.practicum.filmorate.controller;
 
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import ru.yandex.practicum.filmorate.model.User;
-import ru.yandex.practicum.filmorate.model.UserIdGenerator;
+import ru.yandex.practicum.filmorate.service.UserService;
 
 import javax.validation.Valid;
-import java.util.Map;
-import java.util.HashMap;
+import java.util.List;
 
 @Slf4j
 @RestController
 @RequestMapping("/users")
 public class UserController {
-    private final Map<Integer, User> users = new HashMap<>();
+    private final UserService userService;
+
+    @Autowired
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
 
     @GetMapping
-    public Map<Integer, User> getAllUsers() {
-        log.info("GET /user: request successfully processed");
-        return users;
+    public List<User> getUsersList() {
+        log.info("GET /users: request successfully processed");
+        return userService.getUsersList();
+    }
+
+    @GetMapping("/{id}")
+    public User getUserById(@PathVariable int id) {
+        log.info("GET /users/{id}: request successfully processed");
+        return userService.getUserById(id);
     }
 
     @PostMapping
-    public User createUser(@Valid @RequestBody User user) throws ValidationException {
-        if (user.getId() != 0) {
-            String message = "An id was passed (user id is assigned automatically)";
-            log.warn("POST /user: ValidationException: {}", message);
-            throw new ValidationException(message);
-        } else {
-            for (Map.Entry<Integer, User> oldUser : users.entrySet()) {
-                if (oldUser.getValue().getEmail().equals(user.getEmail())) {
-                    String message = "A user with such an email already exists";
-                    log.warn("POST /user: ValidationException: {}", message);
-                    throw new ValidationException(message);
-                }
-                if (oldUser.getValue().getLogin().equals(user.getLogin())) {
-                    String message = "A user with such login already exists";
-                    log.warn("POST /user: ValidationException: {}", message);
-                    throw new ValidationException(message);
-                }
-            }
-            user.setId(UserIdGenerator.getUserId());
-            if (user.getName().isBlank()) {
-                user.setName(user.getLogin());
-            }
-            users.put(user.getId(), user);
-            log.info("POST /user: user successfully created");
-            return user;
-        }
+    public User createUser(@Valid @RequestBody User user) {
+        log.info("POST /users: user successfully created");
+        return userService.createUser(user);
     }
 
     @PutMapping
-    public User updateUser(@Valid @RequestBody User newUser) throws ValidationException {
-        if (newUser.getId() == 0) {
-            String message = "An empty user id was passed";
-            log.warn("PUT /user: ValidationException: {}", message);
-            throw new ValidationException(message);
-        } else if (!users.containsKey(newUser.getId())) {
-            String message = "There is no user with such id";
-            log.warn("PUT /user: ValidationException: {}", message);
-            throw new ValidationException(message);
-        } else {
-            User user = users.get(newUser.getId());
-            user.setName(newUser.getName());
-            user.setBirthday(newUser.getBirthday());
-            log.info("PUT /user: user successfully updated");
-            return user;
-        }
+    public User updateUser(@Valid @RequestBody User newUser) {
+        log.info("PUT /users: user successfully updated");
+        return userService.updateUser(newUser);
+    }
+
+    @PutMapping("/{id}/friends/{friendId}")
+    public void addFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.addFriend(id, friendId);
+    }
+
+    @DeleteMapping("/{id}/friends/{friendId}")
+    public void deleteFriend(@PathVariable int id, @PathVariable int friendId) {
+        userService.deleteFriend(id, friendId);
+    }
+
+    @GetMapping("/{id}/friends")
+    public List<User> getFriendsListById(@PathVariable int id) {
+        return userService.getFriendsListById(id);
+    }
+
+    @GetMapping("/{id}/friends/common/{otherId}")
+    public List<User> getCommonFriends(@PathVariable int id, @PathVariable int otherId) {
+        return userService.getCommonFriends(id, otherId);
     }
 }
