@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.*;
 
 import javax.validation.*;
 import java.io.IOException;
-import java.time.Instant;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -37,7 +36,7 @@ class FilmValidationTest {
         assertEquals(0, violations.size());
         assertEquals("Stranger Things", film.getName());
         assertEquals("Description", film.getDescription());
-        assertEquals(Instant.parse("2016-07-15T00:00:00Z").toEpochMilli(), film.getReleaseDate());
+        assertEquals("2016-07-15", film.getReleaseDate().toString());
         assertEquals(50, film.getDuration());
     }
 
@@ -79,15 +78,27 @@ class FilmValidationTest {
     }
 
     @Test
-    void emptyDescriptionShouldSucceed() throws IOException {
+    void emptyDescriptionShouldFail() throws IOException {
         String json = "{\"name\": \"Stranger Things\", \"description\": \"\", " +
                       "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
 
-        assertEquals(0, violations.size());
-        assertEquals("", film.getDescription());
+        assertEquals(1, violations.size());
+        assertTrue(violations.contains("не должно быть пустым"));
+    }
+
+    @Test
+    void blankDescriptionShouldFail() throws IOException {
+        String json = "{\"name\": \"Stranger Things\", \"description\": \"     \", " +
+                "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+
+        Film film = jsonTester.parse(json).getObject();
+        List<String> violations = validateFilm(film);
+
+        assertEquals(1, violations.size());
+        assertTrue(violations.contains("не должно быть пустым"));
     }
 
     @Test
@@ -134,7 +145,8 @@ class FilmValidationTest {
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
 
-        assertEquals(1, violations.size());
+        assertEquals(2, violations.size());
+        assertTrue(violations.contains("не должно быть пустым"));
         assertTrue(violations.contains("не должно равняться null"));
     }
 
@@ -147,7 +159,7 @@ class FilmValidationTest {
         List<String> violations = validateFilm(film);
 
         assertEquals(0, violations.size());
-        assertEquals(Instant.parse("1895-12-28T00:00:00Z").toEpochMilli(), film.getReleaseDate());
+        assertEquals("1895-12-28", film.getReleaseDate().toString());
     }
 
     @Test

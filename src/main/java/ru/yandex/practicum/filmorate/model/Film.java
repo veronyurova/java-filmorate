@@ -1,10 +1,12 @@
 package ru.yandex.practicum.filmorate.model;
 
 import lombok.*;
+import ru.yandex.practicum.filmorate.constraints.MinDate;
 
 import javax.validation.constraints.*;
 import java.time.LocalDate;
-import java.time.ZoneOffset;
+import java.util.Set;
+import java.util.HashSet;
 
 @Getter
 @Setter
@@ -15,22 +17,22 @@ public class Film {
     @NotBlank
     private String name;
     @NotNull
-    @Size(max=200)
+    @NotBlank
+    @Size(max = 200)
     private String description;
     @NotNull
-    @Min(value = MIN_RELEASE_DATE, message = "должно быть не раньше 28 декабря 1895 года")
-    private long releaseDate;
+    @MinDate(date = "1895-12-28", message = "должно быть не раньше 28 декабря 1895 года")
+    private LocalDate releaseDate;
     @Positive
     private int duration;
+    private final Set<Integer> likes;
 
-    private static final long MIN_RELEASE_DATE = -2335564800000L;
-
-    public Film(int id, String name, String description, String releaseDate, int duration) {
+    public Film(int id, String name, String description, LocalDate releaseDate, int duration) {
         this.id = id;
         this.name = name;
         this.description = description;
-        this.releaseDate = LocalDate.parse(releaseDate)
-                .atStartOfDay().toInstant(ZoneOffset.UTC).toEpochMilli();
+        this.releaseDate = releaseDate;
         this.duration = duration;
+        likes = new HashSet<>();
     }
 }

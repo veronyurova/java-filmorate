@@ -40,7 +40,7 @@ class UserValidationTest {
         assertEquals("twinpeaks", user.getLogin());
         assertEquals("David Linch", user.getName());
         assertEquals("mail@mail.ru", user.getEmail());
-        assertEquals(Instant.parse("1946-01-20T00:00:00Z"), user.getBirthday());
+        assertEquals("1946-01-20", user.getBirthday().toString());
     }
 
     @Test
@@ -206,11 +206,11 @@ class UserValidationTest {
     }
 
     @Test
-    void birthdayTodayShouldSucceed() throws IOException {
+    void birthdayYesterdayShouldSucceed() throws IOException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd")
                                                        .withZone(ZoneOffset.UTC);
-        Instant now = Instant.now();
-        String birthday = formatter.format(now);
+        Instant yesterday = Instant.now().minusSeconds(86400);
+        String birthday = formatter.format(yesterday);
         String json = "{\"login\": \"twinpeaks\", \"name\": \"David Linch\", " +
                       "\"email\": \"mail@mail.ru\", \"birthday\": \"" + birthday + "\"}";
 
