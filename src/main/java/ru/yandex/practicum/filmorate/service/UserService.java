@@ -16,6 +16,9 @@ import java.util.stream.Collectors;
 @Service
 public class UserService {
     private final UserStorage userStorage;
+    private final static String EMPTY_ID_MESSAGE = "An empty user id was passed";
+    private final static String NEEDLESS_ID_MESSAGE = "An id was passed " +
+            "(user id is assigned automatically)";
 
     @Autowired
     public UserService(UserStorage userStorage) {
@@ -32,9 +35,8 @@ public class UserService {
 
     public User createUser(User user) {
         if (user.getId() != 0) {
-            String message = "An id was passed (user id is assigned automatically)";
-            log.warn("ValidationException at UserService.createUser: {}", message);
-            throw new ValidationException(message);
+            log.warn("ValidationException at UserService.createUser: {}", NEEDLESS_ID_MESSAGE);
+            throw new ValidationException(NEEDLESS_ID_MESSAGE);
         }
         user.setId(UserIdGenerator.getUserId());
         if (user.getName().isBlank()) {
@@ -46,9 +48,8 @@ public class UserService {
 
     public User updateUser(User newUser) {
         if (newUser.getId() == 0) {
-            String message = "An empty user id was passed";
-            log.warn("ValidationException at UserService.updateUser: {}", message);
-            throw new ValidationException(message);
+            log.warn("ValidationException at UserService.updateUser: {}", EMPTY_ID_MESSAGE);
+            throw new ValidationException(EMPTY_ID_MESSAGE);
         }
         User user = getUserById(newUser.getId());
         if (!user.getEmail().equals(newUser.getEmail())) {

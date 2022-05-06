@@ -17,6 +17,9 @@ import java.util.stream.Collectors;
 public class FilmService {
     private final FilmStorage filmStorage;
     private final UserService userService;
+    private final static String EMPTY_ID_MESSAGE = "An empty film id was passed";
+    private final static String NEEDLESS_ID_MESSAGE = "An id was passed " +
+            "(film id is assigned automatically)";
 
     @Autowired
     public FilmService(FilmStorage filmStorage, UserService userService) {
@@ -34,9 +37,8 @@ public class FilmService {
 
     public Film createFilm(Film film) {
         if (film.getId() != 0) {
-            String message = "An id was passed (film id is assigned automatically)";
-            log.warn("ValidationException at FilmService.createFilm: {}", message);
-            throw new ValidationException(message);
+            log.warn("ValidationException at FilmService.createFilm: {}", NEEDLESS_ID_MESSAGE);
+            throw new ValidationException(NEEDLESS_ID_MESSAGE);
         }
         film.setId(FilmIdGenerator.getFilmId());
         log.info("FilmService.createFilm: film {} successfully created", film.getId());
@@ -45,9 +47,8 @@ public class FilmService {
 
     public Film updateFilm(Film newFilm) {
         if (newFilm.getId() == 0) {
-            String message = "An empty film id was passed";
-            log.warn("ValidationException at FilmService.updateFilm: {}", message);
-            throw new ValidationException(message);
+            log.warn("ValidationException at FilmService.updateFilm: {}", EMPTY_ID_MESSAGE);
+            throw new ValidationException(EMPTY_ID_MESSAGE);
         }
         Film film = getFilmById(newFilm.getId());
         film.setName(newFilm.getName());
