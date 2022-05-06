@@ -26,7 +26,7 @@ public class User {
     @NotNull
     @Past
     private LocalDate birthday;
-    private Set<Integer> friends;
+    private final Set<Integer> friends;
 
     public User(int id, String email, String login, String name, LocalDate birthday) {
         this.id = id;

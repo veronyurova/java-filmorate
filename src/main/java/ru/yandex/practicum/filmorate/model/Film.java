@@ -18,14 +18,14 @@ public class Film {
     private String name;
     @NotNull
     @NotBlank
-    @Size(max=200)
+    @Size(max = 200)
     private String description;
     @NotNull
     @MinDate(date = "1895-12-28", message = "должно быть не раньше 28 декабря 1895 года")
     private LocalDate releaseDate;
     @Positive
     private int duration;
-    private Set<Integer> likes;
+    private final Set<Integer> likes;
 
     public Film(int id, String name, String description, LocalDate releaseDate, int duration) {
         this.id = id;

@@ -21,7 +21,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film getFilmById(int id) {
         if (!films.containsKey(id)) {
-            String message = "There is no film with such id";
+            String message = String.format("There is no film with id %d", id);
             log.warn("FilmNotFoundException at InMemoryFilmStorage.getFilmById: {}", message);
             throw new FilmNotFoundException(message);
         }
@@ -31,6 +31,8 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public Film addFilm(Film film) {
         films.put(film.getId(), film);
+        log.info("InMemoryFilmStorage.addFilm: film {} " +
+                 "successfully added to storage", film.getId());
         return film;
     }
 
@@ -42,5 +44,7 @@ public class InMemoryFilmStorage implements FilmStorage {
     @Override
     public void deleteFilmById(int id) {
         films.remove(id);
+        log.info("InMemoryFilmStorage.deleteFilmById: film {} " +
+                 "successfully deleted from storage", id);
     }
 }

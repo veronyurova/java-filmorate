@@ -21,26 +21,22 @@ public class UserController {
     }
 
     @GetMapping
-    public List<User> getUsersList() {
-        log.info("GET /users: request successfully processed");
+    public List<User> getUsers() {
         return userService.getUsersList();
     }
 
     @GetMapping("/{id}")
     public User getUserById(@PathVariable int id) {
-        log.info("GET /users/{id}: request successfully processed");
         return userService.getUserById(id);
     }
 
     @PostMapping
     public User createUser(@Valid @RequestBody User user) {
-        log.info("POST /users: user successfully created");
         return userService.createUser(user);
     }
 
     @PutMapping
     public User updateUser(@Valid @RequestBody User newUser) {
-        log.info("PUT /users: user successfully updated");
         return userService.updateUser(newUser);
     }
 
@@ -55,7 +51,7 @@ public class UserController {
     }
 
     @GetMapping("/{id}/friends")
-    public List<User> getFriendsListById(@PathVariable int id) {
+    public List<User> getFriendsById(@PathVariable int id) {
         return userService.getFriendsListById(id);
     }
 

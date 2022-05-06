@@ -2,10 +2,10 @@ package ru.yandex.practicum.filmorate.storage;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
-import ru.yandex.practicum.filmorate.exception.EmailAlreadyTakenException;
-import ru.yandex.practicum.filmorate.exception.LoginAlreadyTakenException;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
+import ru.yandex.practicum.filmorate.exception.EmailAlreadyTakenException;
+import ru.yandex.practicum.filmorate.exception.LoginAlreadyTakenException;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -23,7 +23,7 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public User getUserById(int id) {
         if (!users.containsKey(id)) {
-            String message = "There is no user with such id";
+            String message = String.format("There is no user with id %d", id);
             log.warn("UserNotFoundException at InMemoryUserStorage.getUserById: {}", message);
             throw new UserNotFoundException(message);
         }
@@ -35,6 +35,8 @@ public class InMemoryUserStorage implements UserStorage {
         checkEmailAvailability(user);
         checkLoginAvailability(user);
         users.put(user.getId(), user);
+        log.info("InMemoryUserStorage.addUser: user {} " +
+                 "successfully added to storage", user.getId());
         return user;
     }
 
@@ -46,13 +48,15 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void deleteUserById(int id) {
         users.remove(id);
+        log.info("InMemoryUserStorage.deleteUserById: user {} " +
+                 "successfully deleted from storage", id);
     }
 
     @Override
     public void checkEmailAvailability(User newUser) {
         for (User user : users.values()) {
             if (user.getEmail().equals(newUser.getEmail())) {
-                String message = "A user with such email already exists";
+                String message = String.format("Email %s is already taken", newUser.getEmail());
                 log.warn("EmailAlreadyTakenException at InMemoryUserStorage.addUser: {}", message);
                 throw new EmailAlreadyTakenException(message);
             }
@@ -62,8 +66,8 @@ public class InMemoryUserStorage implements UserStorage {
     @Override
     public void checkLoginAvailability(User newUser) {
         for (User user : users.values()) {
-            if (user.getEmail().equals(newUser.getEmail())) {
-                String message = "A user with such login already exists";
+            if (user.getLogin().equals(newUser.getLogin())) {
+                String message = String.format("Login %s is already taken", newUser.getLogin());
                 log.warn("LoginAlreadyTakenException at InMemoryUserStorage.addUser: {}", message);
                 throw new LoginAlreadyTakenException(message);
             }

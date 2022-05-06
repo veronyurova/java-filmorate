@@ -1,8 +1,8 @@
 package ru.yandex.practicum.filmorate.service;
 
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.model.User;
 import ru.yandex.practicum.filmorate.model.UserIdGenerator;
 import ru.yandex.practicum.filmorate.storage.UserStorage;
@@ -40,6 +40,7 @@ public class UserService {
         if (user.getName().isBlank()) {
             user.setName(user.getLogin());
         }
+        log.info("UserService.createUser: user {} successfully created", user.getId());
         return userStorage.addUser(user);
     }
 
@@ -56,6 +57,7 @@ public class UserService {
         user.setEmail(newUser.getEmail());
         user.setName(newUser.getName());
         user.setBirthday(newUser.getBirthday());
+        log.info("UserService.updateUser: user {} successfully updated", user.getId());
         return userStorage.updateUser(user);
     }
 
@@ -64,6 +66,8 @@ public class UserService {
         User friend = getUserById(friendId);
         user.getFriends().add(friendId);
         friend.getFriends().add(id);
+        log.info("UserService.addFriend: friend {} successfully " +
+                 "added to user {} friends", friendId, id);
     }
 
     public void deleteFriend(int id, int friendId) {
@@ -71,6 +75,8 @@ public class UserService {
         User friend = getUserById(friendId);
         user.getFriends().remove(friendId);
         friend.getFriends().remove(id);
+        log.info("UserService.deleteFriend: friend {} successfully " +
+                 "deleted from user {} friends", friendId, id);
     }
 
     public List<User> getFriendsListById(int id) {
@@ -82,6 +88,7 @@ public class UserService {
     public List<User> getCommonFriends(int id, int otherId) {
         return getUserById(id).getFriends().stream()
                 .filter(friendId -> getUserById(otherId).getFriends().contains(friendId))
-                .map(this::getUserById).collect(Collectors.toList());
+                .map(this::getUserById)
+                .collect(Collectors.toList());
     }
 }
