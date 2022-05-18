@@ -55,7 +55,11 @@ public class UserService {
         if (!user.getEmail().equals(newUser.getEmail())) {
             userStorage.checkEmailAvailability(newUser);
         }
+        if (!user.getLogin().equals(newUser.getLogin())) {
+            userStorage.checkLoginAvailability(newUser);
+        }
         user.setEmail(newUser.getEmail());
+        user.setLogin(newUser.getLogin());
         user.setName(newUser.getName());
         user.setBirthday(newUser.getBirthday());
         log.info("UserService.updateUser: user {} successfully updated", user.getId());
