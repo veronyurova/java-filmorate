@@ -36,6 +36,12 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleMpaNotFoundException(MpaNotFoundException e) {
+        return new ErrorResponse("MpaNotFound", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleUserNotFoundException(UserNotFoundException e) {
         return new ErrorResponse("UserNotFound", e.getMessage());
     }
