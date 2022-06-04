@@ -18,7 +18,7 @@ public class FilmService {
     private final UserService userService;
     private final static String EMPTY_ID_MESSAGE = "An empty film id was passed";
     private final static String NEEDLESS_ID_MESSAGE = "An id was passed " +
-            "(film id is assigned automatically)";
+                                                      "(film id is assigned automatically)";
 
     @Autowired
     public FilmService(FilmStorage filmStorage, FilmLikeStorage filmLikeStorage,
@@ -30,6 +30,10 @@ public class FilmService {
 
     public List<Film> getFilmsList() {
         return filmStorage.getFilms();
+    }
+
+    public List<Film> getPopularFilms(int count) {
+        return filmStorage.getPopularFilms(count);
     }
 
     public Film getFilmById(int id) {
@@ -57,19 +61,11 @@ public class FilmService {
         getFilmById(id);
         userService.getUserById(userId);
         filmLikeStorage.addLike(id, userId);
-        log.info("FilmService.addLike: like for film {} from user {} " +
-                 "successfully added", id, userId);
     }
 
     public void deleteLike(int id, int userId) {
         getFilmById(id);
         userService.getUserById(userId);
         filmLikeStorage.deleteLike(id, userId);
-        log.info("FilmService.deleteLike: like for film {} from user {} " +
-                 "successfully deleted", id, userId);
-    }
-
-    public List<Film> getPopularFilms(int count) {
-        return filmStorage.getPopularFilms(count);
     }
 }

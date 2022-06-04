@@ -28,7 +28,7 @@ class FilmValidationTest {
     @Test
     void allFieldsAreCorrectShouldSucceed() throws IOException {
         String json = "{\"name\": \"Stranger Things\", \"description\": \"Description\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -43,7 +43,7 @@ class FilmValidationTest {
     @Test
     void emptyNameShouldFail() throws IOException {
         String json = "{\"name\": \"\", \"description\": \"Description\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -55,7 +55,7 @@ class FilmValidationTest {
     @Test
     void blankNameShouldFail() throws IOException {
         String json = "{\"name\": \"     \", \"description\": \"Description\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -67,7 +67,7 @@ class FilmValidationTest {
     @Test
     void nullNameShouldFail() throws IOException {
         String json = "{\"description\": \"Description\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -80,7 +80,7 @@ class FilmValidationTest {
     @Test
     void emptyDescriptionShouldFail() throws IOException {
         String json = "{\"name\": \"Stranger Things\", \"description\": \"\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -92,7 +92,7 @@ class FilmValidationTest {
     @Test
     void blankDescriptionShouldFail() throws IOException {
         String json = "{\"name\": \"Stranger Things\", \"description\": \"     \", " +
-                "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+                "\"releaseDate\": \"2016-07-15\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -108,7 +108,7 @@ class FilmValidationTest {
                       "descrdescrdescrdescrdescrdescrdescrdescrdescrdescr" +
                       "descrdescrdescrdescrdescrdescrdescrdescrdescrdescr" +
                       "descrdescrdescrdescrdescrdescrdescrdescrdescrdescr\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -128,7 +128,7 @@ class FilmValidationTest {
                       "descrdescrdescrdescrdescrdescrdescrdescrdescrdescr" +
                       "descrdescrdescrdescrdescrdescrdescrdescrdescrdescr" +
                       "descrdescrdescrdescrdescrdescrdescrdescrdescrdescr1\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -140,7 +140,7 @@ class FilmValidationTest {
     @Test
     void nullDescriptionShouldFail() throws IOException {
         String json = "{\"name\": \"Stranger Things\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -153,7 +153,7 @@ class FilmValidationTest {
     @Test
     void correctReleaseDateShouldSucceed() throws IOException {
         String json = "{\"name\": \"Stranger Things\", \"description\": \"Description\", " +
-                      "\"releaseDate\": \"1895-12-28\", \"duration\": 50}";
+                      "\"releaseDate\": \"1895-12-28\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -165,7 +165,7 @@ class FilmValidationTest {
     @Test
     void incorrectReleaseDateShouldFail() throws IOException {
         String json = "{\"name\": \"Stranger Things\", \"description\": \"Description\", " +
-                      "\"releaseDate\": \"1895-12-27\", \"duration\": 50}";
+                      "\"releaseDate\": \"1895-12-27\", \"duration\": 50, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -177,19 +177,19 @@ class FilmValidationTest {
     @Test
     void positiveDurationShouldSucceed() throws IOException {
         String json = "{\"name\": \"Stranger Things\", \"description\": \"Description\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 1000000}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 100, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
 
         assertEquals(0, violations.size());
-        assertEquals(1000000, film.getDuration());
+        assertEquals(100, film.getDuration());
     }
 
     @Test
     void negativeDurationShouldFail() throws IOException {
         String json = "{\"name\": \"Stranger Things\", \"description\": \"Description\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": -1}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": -1, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);
@@ -201,7 +201,7 @@ class FilmValidationTest {
     @Test
     void zeroDurationShouldFail() throws IOException {
         String json = "{\"name\": \"Stranger Things\", \"description\": \"Description\", " +
-                      "\"releaseDate\": \"2016-07-15\", \"duration\": 0}";
+                      "\"releaseDate\": \"2016-07-15\", \"duration\": 0, \"mpa\": { \"id\": 1}}";
 
         Film film = jsonTester.parse(json).getObject();
         List<String> violations = validateFilm(film);

@@ -1,9 +1,10 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.mem;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import org.springframework.beans.factory.annotation.Autowired;
 import ru.yandex.practicum.filmorate.model.User;
+import ru.yandex.practicum.filmorate.storage.FriendshipStorage;
 
 @Slf4j
 @Component
@@ -20,6 +21,8 @@ public class InMemoryFriendshipStorage implements FriendshipStorage {
         User user = inMemoryUserStorage.getUserById(id);
         inMemoryUserStorage.getUserById(friendId);
         user.getFriends().add(friendId);
+        log.info("InMemoryFriendshipStorage.addFriend: friend {} " +
+                 "successfully added to user {} friends", friendId, id);
     }
 
     @Override
@@ -27,5 +30,7 @@ public class InMemoryFriendshipStorage implements FriendshipStorage {
         User user = inMemoryUserStorage.getUserById(id);
         inMemoryUserStorage.getUserById(friendId);
         user.getFriends().remove(friendId);
+        log.info("InMemoryFriendshipStorage.deleteFriend: friend {} " +
+                 "successfully deleted from user {} friends", friendId, id);
     }
 }

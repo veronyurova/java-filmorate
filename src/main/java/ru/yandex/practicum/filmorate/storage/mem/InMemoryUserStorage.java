@@ -1,4 +1,4 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.mem;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
@@ -7,6 +7,7 @@ import ru.yandex.practicum.filmorate.model.UserIdGenerator;
 import ru.yandex.practicum.filmorate.exception.UserNotFoundException;
 import ru.yandex.practicum.filmorate.exception.EmailAlreadyTakenException;
 import ru.yandex.practicum.filmorate.exception.LoginAlreadyTakenException;
+import ru.yandex.practicum.filmorate.storage.UserStorage;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -73,7 +74,8 @@ public class InMemoryUserStorage implements UserStorage {
         user.setLogin(newUser.getLogin());
         user.setName(newUser.getName());
         user.setBirthday(newUser.getBirthday());
-        log.info("InMemoryUserStorage.updateUser: user {} successfully updated", user.getId());
+        log.info("InMemoryUserStorage.updateUser: user {} " +
+                 "successfully updated", user.getId());
         return user;
     }
 

@@ -7,15 +7,15 @@ import lombok.EqualsAndHashCode;
 @Getter
 @Setter
 @EqualsAndHashCode
-public class Mpa {
+public class Genre {
     private int id;
     private String name;
 
-    public Mpa(int id) {
+    public Genre(int id) {
         this.id = id;
     }
 
-    public Mpa(int id, String name) {
+    public Genre(int id, String name) {
         this.id = id;
         this.name = name;
     }

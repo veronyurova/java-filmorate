@@ -42,6 +42,12 @@ public class CustomExceptionHandler {
 
     @ExceptionHandler
     @ResponseStatus(HttpStatus.NOT_FOUND)
+    public ErrorResponse handleGenreNotFoundException(GenreNotFoundException e) {
+        return new ErrorResponse("GenreNotFound", e.getMessage());
+    }
+
+    @ExceptionHandler
+    @ResponseStatus(HttpStatus.NOT_FOUND)
     public ErrorResponse handleUserNotFoundException(UserNotFoundException e) {
         return new ErrorResponse("UserNotFound", e.getMessage());
     }

@@ -1,10 +1,11 @@
-package ru.yandex.practicum.filmorate.storage;
+package ru.yandex.practicum.filmorate.storage.mem;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.FilmIdGenerator;
 import ru.yandex.practicum.filmorate.exception.FilmNotFoundException;
+import ru.yandex.practicum.filmorate.storage.FilmStorage;
 
 import java.util.Map;
 import java.util.HashMap;
@@ -56,7 +57,8 @@ public class InMemoryFilmStorage implements FilmStorage {
         film.setDescription(newFilm.getDescription());
         film.setReleaseDate(newFilm.getReleaseDate());
         film.setDuration(newFilm.getDuration());
-        log.info("InMemoryFilmStorage.updateFilm: film {} successfully updated", film.getId());
+        log.info("InMemoryFilmStorage.updateFilm: film {} " +
+                 "successfully updated", film.getId());
         return film;
     }
 

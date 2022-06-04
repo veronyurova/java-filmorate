@@ -17,7 +17,7 @@ public class UserService {
     private final FriendshipStorage friendshipStorage;
     private final static String EMPTY_ID_MESSAGE = "An empty user id was passed";
     private final static String NEEDLESS_ID_MESSAGE = "An id was passed " +
-            "(user id is assigned automatically)";
+                                                      "(user id is assigned automatically)";
 
     @Autowired
     public UserService(UserStorage userStorage, FriendshipStorage friendshipStorage) {
@@ -57,16 +57,12 @@ public class UserService {
         getUserById(id);
         getUserById(friendId);
         friendshipStorage.addFriend(id, friendId);
-        log.info("UserService.addFriend: friend {} successfully " +
-                 "added to user {} friends", friendId, id);
     }
 
     public void deleteFriend(int id, int friendId) {
         getUserById(id);
         getUserById(friendId);
         friendshipStorage.deleteFriend(id, friendId);
-        log.info("UserService.deleteFriend: friend {} successfully " +
-                 "deleted from user {} friends", friendId, id);
     }
 
     public List<User> getFriendsListById(int id) {
