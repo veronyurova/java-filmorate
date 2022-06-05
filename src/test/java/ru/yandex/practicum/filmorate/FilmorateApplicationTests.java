@@ -18,7 +18,9 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Mpa;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @SpringBootTest
 @AutoConfigureTestDatabase
@@ -29,6 +31,8 @@ class FilmorateApplicationTests {
     private final DatabaseFriendshipStorage friendshipStorage;
     private final DatabaseFilmLikeStorage filmLikeStorage;
     private final Mpa mpa = new Mpa(1, "G");
+    private final HashSet<Integer> likes = new HashSet<>();
+    private final HashSet<Integer> genres = new HashSet<>(Set.of(1, 2));
 
     @BeforeAll
     static void beforeAll(@Autowired DatabaseUserStorage userStorage,
@@ -40,9 +44,11 @@ class FilmorateApplicationTests {
         userStorage.addUser(user2);
         userStorage.addUser(user3);
         Mpa mpa = new Mpa(1, "G");
-        Film film1 = new Film(1, "Film1", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
-        Film film2 = new Film(2, "Film2", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
-        Film film3 = new Film(3, "Film3", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
+        HashSet<Integer> likes = new HashSet<>();
+        HashSet<Integer> genres = new HashSet<>(Set.of(1, 2));
+        Film film1 = new Film(1, "F1", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes, genres);
+        Film film2 = new Film(2, "F2", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes, genres);
+        Film film3 = new Film(3, "F3", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes, genres);
         filmStorage.addFilm(film1);
         filmStorage.addFilm(film2);
         filmStorage.addFilm(film3);
@@ -181,9 +187,11 @@ class FilmorateApplicationTests {
 
     @Test
     void getPopularFilms() {
-        Film film1 = new Film(1, "Film1", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
-        Film film2 = new Film(2, "Film2", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
-        Film film3 = new Film(3, "Film3", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
+        HashSet<Integer> likes2 = new HashSet<>(Set.of(1, 2, 3));
+        HashSet<Integer> likes3 = new HashSet<>(Set.of(1, 2));
+        Film film1 = new Film(1, "F1", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes, genres);
+        Film film2 = new Film(2, "F2", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes2, genres);
+        Film film3 = new Film(3, "F3", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes3, genres);
         List<Film> filmsExpected = List.of(film2, film3, film1);
         filmLikeStorage.addLike(2, 1);
         filmLikeStorage.addLike(2, 2);
@@ -207,7 +215,8 @@ class FilmorateApplicationTests {
 
     @Test
     void getPopularFilmsCount1() {
-        Film film2 = new Film(2, "Film2", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
+        HashSet<Integer> likes2 = new HashSet<>(Set.of(1, 2));
+        Film film2 = new Film(2, "F2", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes2, genres);
         List<Film> filmsExpected = List.of(film2);
         filmLikeStorage.addLike(2, 1);
         filmLikeStorage.addLike(2, 2);
@@ -234,9 +243,9 @@ class FilmorateApplicationTests {
 
     @Test
     void getFilms() {
-        Film film1 = new Film(1, "Film1", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
-        Film film2 = new Film(2, "Film2", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
-        Film film3 = new Film(3, "Film3", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
+        Film film1 = new Film(1, "F1", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes, genres);
+        Film film2 = new Film(2, "F2", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes, genres);
+        Film film3 = new Film(3, "F3", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes, genres);
         List<Film> filmsExpected = List.of(film1, film2, film3);
 
         List<Film> films = filmStorage.getFilms();
@@ -248,7 +257,8 @@ class FilmorateApplicationTests {
 
     @Test
     void getFilmById() {
-        Film filmExpected = new Film(1, "Film1", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
+        Film filmExpected = new Film(1, "F1", "Test", LocalDate.of(2000, 1, 1), 100,
+                mpa, likes, genres);
 
         Film film = filmStorage.getFilmById(1);
 
@@ -263,8 +273,10 @@ class FilmorateApplicationTests {
 
     @Test
     void addFilm() {
-        Film film4 = new Film(0, "Film4", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
-        Film filmExpected = new Film(4, "Film4", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
+        Film film4 = new Film(0, "F4", "Test", LocalDate.of(2000, 1, 1), 100,
+                mpa, likes, genres);
+        Film filmExpected = new Film(4, "F4", "Test", LocalDate.of(2000, 1, 1), 100,
+                mpa, likes, genres);
 
         Film film = filmStorage.addFilm(film4);
 
@@ -276,8 +288,9 @@ class FilmorateApplicationTests {
 
     @Test
     void updateFilm() {
-        Film film5 = new Film(5, "Film5", "Test", LocalDate.of(2000, 1, 1), 100, mpa);
-        Film filmUpd = new Film(5, "UPD", "UPD", LocalDate.of(1900, 1, 1), 200, mpa);
+        HashSet<Integer> upd = new HashSet<>(Set.of(2, 3));
+        Film film5 = new Film(5, "F5", "Test", LocalDate.of(2000, 1, 1), 100, mpa, likes, genres);
+        Film filmUpd = new Film(5, "UPD", "UPD", LocalDate.of(1900, 1, 1), 200, mpa, likes, upd);
         filmStorage.addFilm(film5);
 
         Film film = filmStorage.updateFilm(filmUpd);
@@ -290,7 +303,7 @@ class FilmorateApplicationTests {
 
     @Test
     void deleteFilmById() {
-        Film filmDel = new Film(6, "DEL", "DEL", LocalDate.of(2000, 1, 1), 100, mpa);
+        Film filmDel = new Film(6, "DEL", "", LocalDate.of(2000, 1, 1), 100, mpa, likes, genres);
         filmStorage.addFilm(filmDel);
 
         filmStorage.deleteFilmById(6);

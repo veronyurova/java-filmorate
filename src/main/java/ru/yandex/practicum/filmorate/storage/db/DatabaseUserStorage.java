@@ -23,6 +23,51 @@ import java.util.List;
 @Primary
 public class DatabaseUserStorage implements UserStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final static String GET_USERS_QUERY =
+            "SELECT id, " +
+            "       email, " +
+            "       login, " +
+            "       name, " +
+            "       birthday " +
+            "FROM user;";
+    private final static String GET_USER_BY_ID_QUERY =
+            "SELECT id, " +
+            "       email, " +
+            "       login, " +
+            "       name, " +
+            "       birthday " +
+            "FROM user " +
+            "WHERE id = ?;";
+    private final static String ADD_USER_QUERY =
+            "INSERT INTO user (email, login, name, birthday) " +
+            "VALUES (?, ?, ?, ?);";
+    private final static String UPDATE_USER_QUERY =
+            "UPDATE user " +
+            "SET email = ?, " +
+            "    login = ?, " +
+            "    name = ?, " +
+            "    birthday = ? " +
+            "WHERE id = ?;";
+    private final static String DELETE_USER_BY_ID_QUERY = "DELETE FROM user WHERE id = ?;";
+    private final static String GET_FRIENDS_LIST_BY_ID_QUERY =
+            "SELECT u.id, " +
+            "       u.email, " +
+            "       u.login, " +
+            "       u.name, " +
+            "       u.birthday " +
+            "FROM user AS u " +
+            "JOIN friendship AS sub ON u.id = sub.friend_id " +
+            "WHERE sub.user_id = ?;";
+    private final static String GET_COMMON_FRIENDS_QUERY =
+            "SELECT u.id, " +
+            "       u.email, " +
+            "       u.login, " +
+            "       u.name, " +
+            "       u.birthday " +
+            "FROM user AS u " +
+            "JOIN friendship AS sub ON u.id = sub.friend_id " +
+            "JOIN friendship AS sub_common ON sub.friend_id = sub_common.friend_id " +
+            "WHERE sub.user_id = ? AND sub_common.user_id = ?;";
 
     @Autowired
     public DatabaseUserStorage(JdbcTemplate jdbcTemplate) {
@@ -31,26 +76,13 @@ public class DatabaseUserStorage implements UserStorage {
 
     @Override
     public List<User> getUsers() {
-        String sql = "SELECT id, " +
-                     "       email, " +
-                     "       login, " +
-                     "       name, " +
-                     "       birthday " +
-                     "FROM user;";
-        return jdbcTemplate.query(sql, this::mapRowToUser);
+        return jdbcTemplate.query(GET_USERS_QUERY, this::mapRowToUser);
     }
 
     @Override
     public User getUserById(int id) {
-        String sql = "SELECT id, " +
-                     "       email, " +
-                     "       login, " +
-                     "       name, " +
-                     "       birthday " +
-                     "FROM user " +
-                     "WHERE id = ?;";
         try {
-            return jdbcTemplate.queryForObject(sql, this::mapRowToUser, id);
+            return jdbcTemplate.queryForObject(GET_USER_BY_ID_QUERY, this::mapRowToUser, id);
         } catch (EmptyResultDataAccessException e) {
             String message = String.format("There is no user with id %d", id);
             log.warn("UserNotFoundException at DatabaseUserStorage.getUserById: {}", message);
@@ -60,11 +92,10 @@ public class DatabaseUserStorage implements UserStorage {
 
     @Override
     public User addUser(User user) {
-        String sql = "INSERT INTO user (email, login, name, birthday) " +
-                     "VALUES (?, ?, ?, ?);";
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"id"});
+            PreparedStatement statement = connection.prepareStatement(ADD_USER_QUERY,
+                                                                      new String[]{"id"});
             statement.setString(1, user.getEmail());
             statement.setString(2, user.getLogin());
             statement.setString(3, user.getName());
@@ -78,13 +109,7 @@ public class DatabaseUserStorage implements UserStorage {
 
     @Override
     public User updateUser(User newUser) {
-        String sql = "UPDATE user " +
-                     "SET email = ?, " +
-                     "    login = ?, " +
-                     "    name = ?, " +
-                     "    birthday = ? " +
-                     "WHERE id = ?;";
-        jdbcTemplate.update(sql, newUser.getEmail(), newUser.getLogin(),
+        jdbcTemplate.update(UPDATE_USER_QUERY, newUser.getEmail(), newUser.getLogin(),
                             newUser.getName(), newUser.getBirthday(), newUser.getId());
         log.info("DatabaseUserStorage.updateUser: user {} " +
                  "successfully updated", newUser.getId());
@@ -93,35 +118,17 @@ public class DatabaseUserStorage implements UserStorage {
 
     @Override
     public void deleteUserById(int id) {
-        String sql = "DELETE FROM user WHERE id = ?;";
-        jdbcTemplate.update(sql, id);
+        jdbcTemplate.update(DELETE_USER_BY_ID_QUERY, id);
         log.info("DatabaseUserStorage.deleteUserById: user {} " +
                  "successfully deleted from database", id);
     }
 
     public List<User> getFriendsListById(int id) {
-        String sql = "SELECT u.id, " +
-                "       u.email, " +
-                "       u.login, " +
-                "       u.name, " +
-                "       u.birthday " +
-                "FROM user AS u " +
-                "JOIN friendship AS sub ON u.id = sub.friend_id " +
-                "WHERE sub.user_id = ?;";
-        return jdbcTemplate.query(sql, this::mapRowToUser, id);
+        return jdbcTemplate.query(GET_FRIENDS_LIST_BY_ID_QUERY, this::mapRowToUser, id);
     }
 
     public List<User> getCommonFriends(int id, int otherId) {
-        String sql = "SELECT u.id, " +
-                "       u.email, " +
-                "       u.login, " +
-                "       u.name, " +
-                "       u.birthday " +
-                "FROM user AS u " +
-                "JOIN friendship AS sub ON u.id = sub.friend_id " +
-                "JOIN friendship AS sub_common ON sub.friend_id = sub_common.friend_id " +
-                "WHERE sub.user_id = ? AND sub_common.user_id = ?;";
-        return jdbcTemplate.query(sql, this::mapRowToUser, id, otherId);
+        return jdbcTemplate.query(GET_COMMON_FRIENDS_QUERY, this::mapRowToUser, id, otherId);
     }
 
     private User mapRowToUser(ResultSet resultSet, int rowNum) throws SQLException {

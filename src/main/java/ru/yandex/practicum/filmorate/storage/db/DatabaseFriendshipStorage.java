@@ -12,6 +12,12 @@ import ru.yandex.practicum.filmorate.storage.FriendshipStorage;
 @Primary
 public class DatabaseFriendshipStorage implements FriendshipStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final static String ADD_FRIEND_QUERY =
+            "INSERT INTO friendship (user_id, friend_id) " +
+            "VALUES (?, ?);";
+    private final static String DELETE_FRIEND_QUERY =
+            "DELETE FROM friendship " +
+            "WHERE user_id = ? AND friend_id = ?;";
 
     @Autowired
     public DatabaseFriendshipStorage(JdbcTemplate jdbcTemplate) {
@@ -20,18 +26,14 @@ public class DatabaseFriendshipStorage implements FriendshipStorage {
 
     @Override
     public void addFriend(int id, int friendId) {
-        String sql = "INSERT INTO friendship (user_id, friend_id) " +
-                     "VALUES (?, ?);";
-        jdbcTemplate.update(sql, id, friendId);
+        jdbcTemplate.update(ADD_FRIEND_QUERY, id, friendId);
         log.info("DatabaseFriendshipStorage.addFriend: friend {} " +
                  "successfully added to user {} friends", friendId, id);
     }
 
     @Override
     public void deleteFriend(int id, int friendId) {
-        String sql = "DELETE FROM friendship " +
-                     "WHERE user_id = ? AND friend_id = ?;";
-        jdbcTemplate.update(sql, id, friendId);
+        jdbcTemplate.update(DELETE_FRIEND_QUERY, id, friendId);
         log.info("DatabaseFriendshipStorage.deleteFriend: friend {} " +
                  "successfully deleted from user {} friends", friendId, id);
     }

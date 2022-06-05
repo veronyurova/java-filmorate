@@ -12,6 +12,12 @@ import ru.yandex.practicum.filmorate.storage.FilmLikeStorage;
 @Primary
 public class DatabaseFilmLikeStorage implements FilmLikeStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final static String ADD_LIKE_QUERY =
+            "INSERT INTO film_like (film_id, user_id) " +
+            "VALUES (?, ?);";
+    private final static String DELETE_LIKE_QUERY =
+            "DELETE FROM film_like " +
+            "WHERE film_id = ? AND user_id = ?;";
 
     @Autowired
     public DatabaseFilmLikeStorage(JdbcTemplate jdbcTemplate) {
@@ -20,18 +26,14 @@ public class DatabaseFilmLikeStorage implements FilmLikeStorage {
 
     @Override
     public void addLike(int id, int userId) {
-        String sql = "INSERT INTO film_like (film_id, user_id) " +
-                     "VALUES (?, ?);";
-        jdbcTemplate.update(sql, id, userId);
+        jdbcTemplate.update(ADD_LIKE_QUERY, id, userId);
         log.info("DatabaseFilmLikeStorage.addLike: like for film {} " +
                  "from user {} successfully added", id, userId);
     }
 
     @Override
     public void deleteLike(int id, int userId) {
-        String sql = "DELETE FROM film_like " +
-                     "WHERE film_id = ? AND user_id = ?;";
-        jdbcTemplate.update(sql, id, userId);
+        jdbcTemplate.update(DELETE_LIKE_QUERY, id, userId);
         log.info("DatabaseFilmLikeStorage.deleteLike: like for film {} " +
                  "from user {} successfully deleted", id, userId);
     }

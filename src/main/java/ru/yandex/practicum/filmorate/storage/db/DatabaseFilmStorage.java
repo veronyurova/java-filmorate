@@ -15,11 +15,14 @@ import ru.yandex.practicum.filmorate.model.Film;
 import ru.yandex.practicum.filmorate.model.Genre;
 import ru.yandex.practicum.filmorate.model.Mpa;
 import ru.yandex.practicum.filmorate.storage.FilmStorage;
+import ru.yandex.practicum.filmorate.storage.FilmGenreStorage;
+import ru.yandex.practicum.filmorate.storage.FilmLikeStorage;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.PreparedStatement;
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 
 @Slf4j
@@ -27,58 +30,103 @@ import java.util.List;
 @Primary
 public class DatabaseFilmStorage implements FilmStorage {
     private final JdbcTemplate jdbcTemplate;
+    private final FilmGenreStorage filmGenreStorage;
+    private final FilmLikeStorage filmLikeStorage;
+    private final static String GET_FILMS_QUERY =
+            "SELECT f.id, " +
+            "       f.name, " +
+            "       f.description, " +
+            "       f.release_date, " +
+            "       f.duration, " +
+            "       mpa.id AS mpa_id, " +
+            "       mpa.name AS mpa_name, " +
+            "       GROUP_CONCAT(fl.user_id) AS user_ids, " +
+            "       GROUP_CONCAT(fg.genre_id) AS genre_ids " +
+            "FROM film AS f " +
+            "JOIN mpa ON f.mpa_id = mpa.id " +
+            "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
+            "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
+            "GROUP BY f.id;";
+    private final static String GET_POPULAR_FILMS_QUERY =
+            "SELECT f.id, " +
+            "       f.name, " +
+            "       f.description, " +
+            "       f.release_date, " +
+            "       f.duration, " +
+            "       mpa.id AS mpa_id, " +
+            "       mpa.name AS mpa_name, " +
+            "       GROUP_CONCAT(fl.user_id) AS user_ids, " +
+            "       GROUP_CONCAT(fg.genre_id) AS genre_ids " +
+            "FROM film AS f " +
+            "JOIN mpa ON f.mpa_id = mpa.id " +
+            "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
+            "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
+            "GROUP BY f.id " +
+            "ORDER BY COUNT(fl.user_id) DESC " +
+            "LIMIT ?;";
+    private final static String GET_FILM_BY_ID_QUERY =
+            "SELECT f.id, " +
+            "       f.name, " +
+            "       f.description, " +
+            "       f.release_date, " +
+            "       f.duration, " +
+            "       mpa.id AS mpa_id, " +
+            "       mpa.name AS mpa_name, " +
+            "       GROUP_CONCAT(fl.user_id) AS user_ids, " +
+            "       GROUP_CONCAT(fg.genre_id) AS genre_ids " +
+            "FROM film AS f " +
+            "JOIN mpa ON f.mpa_id = mpa.id " +
+            "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
+            "LEFT JOIN film_genre AS fg ON f.id = fg.film_id " +
+            "WHERE f.id = ? " +
+            "GROUP BY f.id;";
+    private final static String ADD_FILM_QUERY =
+            "INSERT INTO film (name, description, release_date, duration, mpa_id) " +
+            "VALUES (?, ?, ?, ?, ?);";
+    private final static String UPDATE_FILM_QUERY =
+            "UPDATE film " +
+            "SET name = ?, " +
+            "    description = ?, " +
+            "    release_date = ?, " +
+            "    duration = ?, " +
+            "    mpa_id = ? " +
+            "WHERE id = ?;";
+    private final static String DELETE_FILM_BY_ID_QUERY = "DELETE FROM film WHERE id = ?;";
+    private final static String GET_FILMS_BY_GENRE_QUERY =
+            "SELECT f.id, " +
+            "       f.name, " +
+            "       f.description, " +
+            "       f.release_date, " +
+            "       f.duration, " +
+            "       mpa.id AS mpa_id, " +
+            "       mpa.name AS mpa_name " +
+            "FROM film AS f " +
+            "JOIN mpa ON f.mpa_id = mpa.id " +
+            "JOIN film_genre AS fg ON f.id = fg.film_id " +
+            "WHERE fg.genre_id = ?;";
 
     @Autowired
-    public DatabaseFilmStorage(JdbcTemplate jdbcTemplate) {
+    public DatabaseFilmStorage(JdbcTemplate jdbcTemplate, FilmGenreStorage filmGenreStorage,
+                               FilmLikeStorage filmLikeStorage) {
         this.jdbcTemplate = jdbcTemplate;
+        this.filmGenreStorage = filmGenreStorage;
+        this.filmLikeStorage = filmLikeStorage;
     }
 
     @Override
     public List<Film> getFilms() {
-        String sql = "SELECT f.id, " +
-                     "       f.name, " +
-                     "       f.description, " +
-                     "       f.release_date, " +
-                     "       f.duration, " +
-                     "       mpa.id AS mpa_id, " +
-                     "       mpa.name AS mpa_name " +
-                     "FROM film AS f " +
-                     "JOIN mpa ON f.mpa_id = mpa.id;";
-        return jdbcTemplate.query(sql, this::mapRowToFilm);
+        return jdbcTemplate.query(GET_FILMS_QUERY, this::mapRowToFilm);
     }
 
     @Override
     public List<Film> getPopularFilms(int count) {
-        String sql = "SELECT f.id, " +
-                     "       f.name, " +
-                     "       f.description, " +
-                     "       f.release_date, " +
-                     "       f.duration, " +
-                     "       mpa.id AS mpa_id, " +
-                     "       mpa.name AS mpa_name " +
-                     "FROM film AS f " +
-                     "JOIN mpa ON f.mpa_id = mpa.id " +
-                     "LEFT JOIN film_like AS fl ON f.id = fl.film_id " +
-                     "GROUP BY f.id " +
-                     "ORDER BY COUNT(fl.user_id) DESC " +
-                     "LIMIT ?;";
-        return jdbcTemplate.query(sql, this::mapRowToFilm, count);
+        return jdbcTemplate.query(GET_POPULAR_FILMS_QUERY, this::mapRowToFilm, count);
     }
 
     @Override
     public Film getFilmById(int id) {
-        String sql = "SELECT f.id, " +
-                     "       f.name, " +
-                     "       f.description, " +
-                     "       f.release_date, " +
-                     "       f.duration, " +
-                     "       mpa.id AS mpa_id, " +
-                     "       mpa.name AS mpa_name " +
-                     "FROM film AS f " +
-                     "JOIN mpa ON f.mpa_id = mpa.id " +
-                     "WHERE f.id = ?;";
         try {
-            return jdbcTemplate.queryForObject(sql, this::mapRowToFilm, id);
+            return jdbcTemplate.queryForObject(GET_FILM_BY_ID_QUERY, this::mapRowToFilm, id);
         } catch (EmptyResultDataAccessException e) {
             String message = String.format("There is no film with id %d", id);
             log.warn("FilmNotFoundException at DatabaseFilmStorage.getFIlmById: {}", message);
@@ -88,12 +136,11 @@ public class DatabaseFilmStorage implements FilmStorage {
 
     @Override
     public Film addFilm(Film film) {
-        String sql = "INSERT INTO film (name, description, release_date, duration, mpa_id) " +
-                     "VALUES (?, ?, ?, ?, ?);";
         checkMpa(film.getMpa().getId());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         jdbcTemplate.update(connection -> {
-            PreparedStatement statement = connection.prepareStatement(sql, new String[]{"id"});
+            PreparedStatement statement = connection.prepareStatement(ADD_FILM_QUERY,
+                                                                      new String[]{"id"});
             statement.setString(1, film.getName());
             statement.setString(2, film.getDescription());
             statement.setDate(3, java.sql.Date.valueOf(film.getReleaseDate()));
@@ -101,51 +148,45 @@ public class DatabaseFilmStorage implements FilmStorage {
             statement.setInt(5, film.getMpa().getId());
             return statement;
         }, keyHolder);
-        log.info("DatabaseFilmStorage.addFilm: film {} " +
-                 "successfully added to database", film.getId());
-        return getFilmById(keyHolder.getKey().intValue());
+        int id = keyHolder.getKey().intValue();
+        for (int userId : film.getLikes()) {
+            filmLikeStorage.addLike(id, userId);
+        }
+        for (int genreId : film.getGenres()) {
+            filmGenreStorage.addGenre(id, genreId);
+        }
+        log.info("DatabaseFilmStorage.addFilm: film {} successfully added to database", id);
+        return getFilmById(id);
     }
 
     @Override
     public Film updateFilm(Film newFilm) {
-        String sql = "UPDATE film " +
-                     "SET name = ?, " +
-                     "    description = ?, " +
-                     "    release_date = ?, " +
-                     "    duration = ?, " +
-                     "    mpa_id = ? " +
-                     "WHERE id = ?;";
         checkMpa(newFilm.getMpa().getId());
-        jdbcTemplate.update(sql, newFilm.getName(), newFilm.getDescription(),
+        int id = newFilm.getId();
+        List<Integer> oldFilmGenres = filmGenreStorage.getGenresByFilmId(id);
+        for (int genreId : oldFilmGenres) {
+            filmGenreStorage.deleteGenre(id, genreId);
+        }
+        jdbcTemplate.update(UPDATE_FILM_QUERY, newFilm.getName(), newFilm.getDescription(),
                             newFilm.getReleaseDate(), newFilm.getDuration(),
                             newFilm.getMpa().getId(), newFilm.getId());
-        log.info("DatabaseFilmStorage.updateFilm: film {} " +
-                 "successfully updated", newFilm.getId());
-        return getFilmById(newFilm.getId());
+        for (int genreId : newFilm.getGenres()) {
+            filmGenreStorage.addGenre(id, genreId);
+        }
+        log.info("DatabaseFilmStorage.updateFilm: film {} successfully updated", id);
+        return getFilmById(id);
     }
 
     @Override
     public void deleteFilmById(int id) {
-        String sql = "DELETE FROM film WHERE id = ?;";
-        jdbcTemplate.update(sql, id);
+        jdbcTemplate.update(DELETE_FILM_BY_ID_QUERY, id);
         log.info("DatabaseFilmStorage.deleteFilmById: film {} " +
                  "successfully deleted from database", id);
     }
 
     public List<Film> getFilmsByGenre(int id) {
-        String sql = "SELECT f.id, " +
-                     "       f.name, " +
-                     "       f.description, " +
-                     "       f.release_date, " +
-                     "       f.duration, " +
-                     "       mpa.id AS mpa_id, " +
-                     "       mpa.name AS mpa_name " +
-                     "FROM film AS f " +
-                     "JOIN mpa ON f.mpa_id = mpa.id " +
-                     "JOIN film_genre AS fg ON f.id = fg.film_id " +
-                     "WHERE fg.genre_id = ?;";
         checkGenre(id);
-        return jdbcTemplate.query(sql, this::mapRowToFilm, id);
+        return jdbcTemplate.query(GET_FILMS_BY_GENRE_QUERY, this::mapRowToFilm, id);
     }
 
     private Film mapRowToFilm(ResultSet resultSet, int rowNum) throws SQLException {
@@ -157,7 +198,25 @@ public class DatabaseFilmStorage implements FilmStorage {
         int mpaId = resultSet.getInt("mpa_id");
         String mpaName = resultSet.getString("mpa_name");
         Mpa mpa = new Mpa(mpaId, mpaName);
-        return new Film(id, name, description, releaseDate, duration, mpa);
+        HashSet<Integer> likes = new HashSet<>();
+        String likesRaw = resultSet.getString("user_ids");
+        if (likesRaw != null) {
+            String[] userIdsRaw = likesRaw.split(",");
+            for (String userIdRaw : userIdsRaw) {
+                int userId = Integer.parseInt(userIdRaw);
+                likes.add(userId);
+            }
+        }
+        HashSet<Integer> genres = new HashSet<>();
+        String genresRaw = resultSet.getString("genre_ids");
+        if (genresRaw != null) {
+            String[] genresIdsRaw = genresRaw.split(",");
+            for (String genreIdRaw : genresIdsRaw) {
+                int genreId = Integer.parseInt(genreIdRaw);
+                genres.add(genreId);
+            }
+        }
+        return new Film(id, name, description, releaseDate, duration, mpa, likes, genres);
     }
 
     private Mpa mapRowToMpa(ResultSet resultSet, int rowNum) throws SQLException {
