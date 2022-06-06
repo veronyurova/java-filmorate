@@ -30,6 +30,11 @@ public class FilmController {
         return filmService.getFilmById(id);
     }
 
+    @GetMapping("/popular")
+    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
+        return filmService.getPopularFilms(count);
+    }
+
     @PostMapping
     public Film createFilm(@Valid @RequestBody Film film) {
         return filmService.createFilm(film);
@@ -50,8 +55,5 @@ public class FilmController {
         filmService.deleteLike(id, userId);
     }
 
-    @GetMapping("/popular")
-    public List<Film> getPopularFilms(@RequestParam(defaultValue = "10") int count) {
-        return filmService.getPopularFilms(count);
-    }
+
 }
